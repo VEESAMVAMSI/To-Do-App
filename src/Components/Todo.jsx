@@ -3,15 +3,16 @@ import todo_icon from '../assets/todo_icon.png';
 import TodoItems from './TodoItems';
 
 const Todo = () => {
-  const [todoList, setTodoList] = useState(localStorage.getItem("todos")?
-        JSON.parse(localStorage.getItem("todos")):[]);
+  const [todoList, setTodoList] = useState(localStorage.getItem("todos") ? JSON.parse(localStorage.getItem("todos")) : []);
+  const [errorMessage, setErrorMessage] = useState('');
   const inputRef = useRef();
 
   const add = () => {
     const inputText = inputRef.current.value.trim();
 
     if (inputText === "") {
-      return null;
+      setErrorMessage('Please enter a task');
+      return;
     }
     const newTodo = {
       id: Date.now(),
@@ -20,29 +21,29 @@ const Todo = () => {
     };
     setTodoList((prev) => [...prev, newTodo]);
     inputRef.current.value = "";
-  }
-  const deleteTodo=(id)=>{
-    setTodoList((prvTodos)=>{
-      return prvTodos.filter((todo)=>todo.id!==id)
-    })
-  }
+    setErrorMessage('');
+  };
 
-  const toggle= (id)=>{
-    setTodoList((prevTodos)=>{
-        return prevTodos.map((todo)=>{
-          if(todo.id===id){
-            return {...todo, isComplete: !todo.isComplete}
-          }
-          return todo;
-        })
-    })
-  }
+  const deleteTodo = (id) => {
+    setTodoList((prevTodos) => {
+      return prevTodos.filter((todo) => todo.id !== id);
+    });
+  };
 
-  useEffect(()=>{
-    localStorage.setItem("todos", JSON.stringify(todoList))
-  },[todoList])
+  const toggle = (id) => {
+    setTodoList((prevTodos) => {
+      return prevTodos.map((todo) => {
+        if (todo.id === id) {
+          return { ...todo, isComplete: !todo.isComplete };
+        }
+        return todo;
+      });
+    });
+  };
 
-
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todoList));
+  }, [todoList]);
 
   return (
     <div className='bg-white place-self-center w-11/12 max-w-md flex flex-col p-7 min-h-[550px] rounded-xl'>
@@ -55,7 +56,7 @@ const Todo = () => {
       <div className='flex items-center my-7 bg-gray-200 rounded-full'>
         <input
           ref={inputRef}
-          className='bg-transparent border-0 outline-none flex-1 h-14 pl-16 pr-2 place-holder:slate-text-600'
+          className='bg-transparent border-0 outline-none flex-1 h-14 pl-16 pr-2 placeholder-slate-600'
           type="text"
           placeholder='Add your Task'
         />
@@ -66,11 +67,13 @@ const Todo = () => {
           ADD +
         </button>
       </div>
+      {/* Error message */}
+      {errorMessage && <div className='text-red-500 text-center mb-3'>{errorMessage}</div>}
       {/*------todoList------*/}
       <div>
         {todoList.map((item) => (
-          <TodoItems key={item} text={item.text}  id={item.id} isComplete={item.isComplete}
-          deleteTodo={deleteTodo} toggle={toggle} />
+          <TodoItems key={item.id} text={item.text} id={item.id} isComplete={item.isComplete}
+            deleteTodo={deleteTodo} toggle={toggle} />
         ))}
       </div>
     </div>
